@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>文山州遴选备考助手</title>
+<style>
+  :root {
+    --primary: #1a6b4f;
+    --primary-light: #e6f2ec;
+    --accent: #c8a24a;
+    --danger: #b5453a;
+    --text: #26313a;
+    --muted: #7a8794;
+    --bg: #f4f6f8;
+    --card: #ffffff;
+    --border: #e4e9ee;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.6;
+    padding-bottom: 70px;
+  }
+  .header {
+    position: sticky; top:0; z-index:20;
+    background: linear-gradient(135deg, #1a6b4f, #2c8a67);
+    color:#fff; padding: 16px 18px 14px;
+  }
+  .header .title { font-size: 18px; font-weight: 700; }
+  .header .sub { font-size: 12px; opacity:.85; margin-top: 2px; }
+  .header .row { display:flex; justify-content:space-between; align-items:center; margin-top:10px; }
+  .checkin-btn {
+    background: var(--accent); color:#3a2f10; border:none; border-radius: 22px;
+    padding: 8px 18px; font-size: 14px; font-weight: 700; cursor:pointer;
+  }
+  .checkin-btn.done { background:#e0e6ec; color:#6b7a88; }
+  .container { max-width: 720px; margin: 0 auto; padding: 12px 12px 0; }
+
+  .tabbar {
+    position: fixed; bottom:0; left:0; right:0; z-index:20;
+    background:#fff; border-top:1px solid var(--border);
+    display:flex; max-width:720px; margin:0 auto;
+  }
+  .tabbar .tab {
+    flex:1; text-align:center; padding:8px 0 6px; cursor:pointer; color:var(--muted);
+  }
+  .tabbar .tab.active { color: var(--primary); font-weight:700; }
+  .tabbar .tab .ic { font-size:20px; display:block; }
+  .tabbar .tab .lb { font-size:11px; }
+
+  .card {
+    background: var(--card); border-radius: 12px; padding: 14px 16px;
+    margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.06);
+    border:1px solid var(--border);
+  }
+  .card h3 { font-size: 16px; margin-bottom: 8px; color:var(--primary); }
+  .section-title {
+    font-size: 14px; font-weight:700; color:var(--text);
+    margin: 18px 2px 10px; display:flex; align-items:center;
+  }
+  .section-title::before { content:""; width:4px; height:16px; background:var(--primary); border-radius:2px; margin-right:8px; }
+  .tag {
+    display:inline-block; font-size:11px; padding:1px 8px; border-radius:10px;
+    background:var(--primary-light); color:var(--primary); margin-right:6px;
+  }
+  .tag.pri-high { background:#fbecec; color:var(--danger); }
+  .tag.pri-mid { background:#fdf3dd; color:#8a6a1a; }
+  .muted { color: var(--muted); font-size: 12px; }
+
+  .list-item {
+    border-bottom:1px solid var(--border); padding:12px 0;
+  }
+  .list-item:last-child { border-bottom:none; }
+  .list-item .t { font-weight:600; margin-bottom:4px; }
+  .list-item .c { font-size:14px; color:#3a4650; }
+  .collapse-head { cursor:pointer; display:flex; justify-content:space-between; align-items:center; }
+  .collapse-body { display:none; margin-top:8px; padding-top:8px; border-top:1px dashed var(--border); }
+  .collapse-body.open { display:block; }
+  .arrow { transition: transform .2s; color:var(--muted); }
+  .arrow.open { transform: rotate(90deg); }
+
+  .q-option {
+    display:block; width:100%; text-align:left; padding:9px 12px; margin:6px 0;
+    border:1px solid var(--border); border-radius:8px; background:#fafbfc; cursor:pointer; font-size:14px;
+  }
+  .q-option.correct { background:#e6f2ec; border-color:var(--primary); color:var(--primary); font-weight:600; }
+  .q-option.wrong { background:#fbecec; border-color:var(--danger); color:var(--danger); }
+  .answer-box { display:none; margin-top:8px; padding:10px 12px; background:#f4f7f5; border-left:3px solid var(--primary); border-radius:6px; font-size:14px; }
+  .answer-box.open { display:block; }
+  .btn {
+    display:inline-block; border:none; border-radius:8px; padding:8px 16px;
+    font-size:14px; cursor:pointer; background:var(--primary); color:#fff;
+  }
+  .btn.ghost { background:#eef1f4; color:var(--text); }
+  .btn.small { padding:5px 12px; font-size:13px; }
+
+  .progress-bar { height:8px; background:#eef1f4; border-radius:4px; overflow:hidden; }
+  .progress-bar .fill { height:100%; background:linear-gradient(90deg,#1a6b4f,#2c8a67); }
+  .stat-grid { display:flex; gap:10px; }
+  .stat { flex:1; background:var(--card); border-radius:10px; padding:12px; text-align:center; border:1px solid var(--border); }
+  .stat .num { font-size:24px; font-weight:700; color:var(--primary); }
+  .stat .lbl { font-size:12px; color:var(--muted); }
+
+  .phase-item { border-left:3px solid var(--primary); padding-left:12px; margin-bottom:14px; }
+  .phase-item .pn { font-weight:700; color:var(--primary); }
+  .phase-item .pp { font-size:12px; color:var(--accent); font-weight:600; }
+  .phase-item ul { margin:6px 0 0 18px; font-size:13px; color:#3a4650; }
+  .module-chip {
+    display:flex; align-items:center; background:var(--card); border:1px solid var(--border);
+    border-radius:10px; padding:12px; margin-bottom:10px; cursor:pointer;
+  }
+  .module-chip .ic { font-size:24px; margin-right:12px; }
+  .module-chip .nm { font-weight:700; }
+  .module-chip .wt { font-size:12px; color:var(--muted); }
+
+  .filter-row { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
+  .filter-btn {
+    border:1px solid var(--border); background:#fff; border-radius:16px;
+    padding:5px 14px; font-size:13px; cursor:pointer; color:var(--muted);
+  }
+  .filter-btn.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+
+  .template-box { white-space:pre-wrap; background:#f8faf9; border-radius:8px; padding:12px; font-size:13px; border:1px solid var(--border); }
+  .toast {
+    position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+    background:rgba(0,0,0,.75); color:#fff; padding:10px 20px; border-radius:8px;
+    font-size:14px; z-index:100; display:none;
+  }
+</style>
+</head>
+<body>
+  <div class="header">
+    <div class="title">文山州遴选备考助手</div>
+    <div class="sub" id="headerSub">—</div>
+    <div class="row">
+      <div class="sub" id="todayDate"></div>
+      <button class="checkin-btn" id="checkinBtn" onclick="toggleCheckin()">今日打卡</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div id="view-today"></div>
+    <div id="view-plan" style="display:none"></div>
+    <div id="view-kaodian" style="display:none"></div>
+    <div id="view-timu" style="display:none"></div>
+    <div id="view-muban" style="display:none"></div>
+    <div id="view-my" style="display:none"></div>
+  </div>
+
+  <div class="tabbar">
+    <div class="tab active" data-tab="today" onclick="switchTab('today')"><span class="ic">📅</span><span class="lb">今日</span></div>
+    <div class="tab" data-tab="plan" onclick="switchTab('plan')"><span class="ic">🗓️</span><span class="lb">计划</span></div>
+    <div class="tab" data-tab="kaodian" onclick="switchTab('kaodian')"><span class="ic">📚</span><span class="lb">考点</span></div>
+    <div class="tab" data-tab="timu" onclick="switchTab('timu')"><span class="ic">📝</span><span class="lb">题库</span></div>
+    <div class="tab" data-tab="muban" onclick="switchTab('muban')"><span class="ic">📄</span><span class="lb">模板</span></div>
+    <div class="tab" data-tab="my" onclick="switchTab('my')"><span class="ic">👤</span><span class="lb">我的</span></div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>window.WSXK_CONTENT = {"meta":{"name":"文山州公务员遴选备考助手","version":"v1.1","updated":"2026-11-22","examYear":2027,"note":"内容持续按权威渠道更新（每周日例行）；考前会追加“考题预测”。"},"modules":[{"id":"zz","name":"政治理论与时政","icon":"⚖️","weight":"客观题主要来源（约15分）","desc":"习近平总书记考察云南重要讲话、党的二十大精神、习近平新时代中国特色社会主义思想、时事政治。","focus":["习近平总书记三次考察云南的重要讲话精神与“三个定位”","云南“3815”战略发展目标","铸牢中华民族共同体意识（主线、写入党章宪法）","党的二十大主题、中心任务、中国式现代化","中央经济工作会议 / 云南省政府工作报告要点"],"method":"以“背关键词 + 刷客观题”为主，建立时政时间轴，每月更新一次最新时政。"},{"id":"ws","name":"文山州情","icon":"🌄","weight":"客观题必考（约10—15分）","desc":"文山州基本情况、三七产业、绿色铝、口岸经济、民族团结、州级重点工作。","focus":["州情基本数据：面积3.14万平方公里、11个世居民族、边境线、辖1市7县","三七产业（“中国三七之乡”，产量占全国九成以上）","绿色铝产业（水电铝材一体化）","口岸经济（天保、都龙、田蓬口岸，面向越南）","民族团结进步示范区建设、兴边富民","州级重点工作与专项行动（如防汛“1262”机制等，以最新州政府文件为准）"],"method":"把州情数字做成“口袋卡片”反复看，结合州政府工作报告原文精读。"},{"id":"ds","name":"党史党建","icon":"🚩","weight":"客观题 + 面试素材（约8分）","desc":"党的基本知识、纪律处分条例、公务员法、基层党建常识。","focus":["党的性质、宗旨、初心使命、入党誓词","《中国共产党纪律处分条例》常见违纪情形","《中华人民共和国公务员法》回避、考核、惩戒要点","基层党组织“三会一课”、主题党日、民主生活会","党的自我革命、全面从严治党"],"method":"熟记“名词解释 + 数字规定”，结合纪律处分条例常见考点刷题。"},{"id":"al","name":"案例分析","icon":"🧩","weight":"主观题（约15分）","desc":"综合分析、组织协调、应急处突、人际沟通四类题型的规范作答。","focus":["综合分析类：表态 + 分析原因/影响 + 提出对策","组织协调类：事前准备 + 事中控制 + 事后总结","应急处突类：生命至上、控制事态、舆情应对、善后整改","人际沟通类：尊重理解 + 原则办事 + 沟通协调 + 反思改进"],"method":"每种题型背熟一个框架，每天精练1道并对照参考答案修改。"},{"id":"gw","name":"公文写作","icon":"📄","weight":"主观题必考（约15分）","desc":"会议通知、会议筹备方案、动员讲话稿、请示报告、方案等法定与常用公文。","focus":["会议通知（要素齐全、时间地点人员议题明确）","会议筹备方案（主题、议程、分工、保障）","动员讲话稿（三段式：意义、任务、要求）","请示 / 报告（一文一事、事由充分、格式规范）","政务信息 / 简报（标题导语、正文、按语）"],"method":"每种文种背“格式骨架 + 金句”，每周手写2篇保持手感。"},{"id":"zw","name":"大作文·策论文","icon":"✍️","weight":"主观题（30分，权重最大）","desc":"围绕文山发展热点（产业、乡村振兴、民族团结、基层治理）写策论文。","focus":["策论文结构：标题 + 开头(破题) + 分论点(对策) + 结尾(升华)","对策“三要素”：主体 + 举措 + 成效","常用金句与本地化案例（三七、绿色铝、口岸、民族团结）","标题拟法与开头“金句导入法”"],"method":"每周1篇完整策论文，积累3—5个“文山本地案例”备用，考前练到45分钟成文。"}],"phases":[{"id":1,"name":"阶段一 · 基础夯实","period":"2026年11月下旬 — 2027年2月","goal":"吃透客观题两大块：政治理论时政 + 文山州情 + 党史党建，打牢知识底座。","tasks":["每天背 2 个考点、刷 10—15 道客观题并订正错题","通读《党的二十大报告》原文 + 习近平总书记考察云南重要讲话全文","精读 2026 年文山州政府工作报告，摘出州情数字与重点工作","建立“错题本”与“时政时间轴”，每周复盘一次"]},{"id":2,"name":"阶段二 · 专项提升","period":"2027年3月 — 2027年5月","goal":"攻克主观题两大板块：案例分析 + 公文写作。","tasks":["案例分析四类题型各练 8—10 道，背熟答题框架","公文写作 5 类文种每周手写 2 篇，对照范文修改","开始积累“文山本地案例库”（三七、绿色铝、口岸、民族团结、基层治理）","每周 1 篇策论文练笔，逐步提速"]},{"id":3,"name":"阶段三 · 综合冲刺","period":"2027年6月 — 2027年8月","goal":"全真模考 + 大作文提速，补齐短板。","tasks":["每周 1 次 3 小时全真模考（严格按 9:00—12:00 计时）","大作文练到 45 分钟内完成 1500 字","针对性补短板模块，错题重刷","整理“万能对策 + 金句 + 本地案例”三件套"]},{"id":4,"name":"阶段四 · 临考预测","period":"2027年9月 — 考前","goal":"紧盯 2027 公告与职位表，时政热点冲刺 + 考题预测。","tasks":["公告发布后第一时间核对报名条件（5年服务期、计算截至月份）","按职位表筛选岗位，锁定 1—2 个主攻方向","冲刺最新时政（中央、省委、州委近期重大部署）","重点预测：州情热点、当年州政府重点工作、民族团结、基层治理"]}],"kaodian":[{"id":"zz-01","module":"zz","title":"习近平总书记三次考察云南","priority":"高","content":"① 2015年1月、2020年1月、2025年3月（最近一次，考察丽江、昆明）。② 强调云南要主动服务和融入国家发展战略，闯出一条跨越式发展的路子。③ 提出“三个定位”：民族团结进步示范区、生态文明建设排头兵、面向南亚东南亚辐射中心。④ 2025年3月考察强调：因地制宜发展新质生产力、推动产业转型升级；加强边疆民族地区治理，拓宽各民族全方位嵌入的实践路径，深入推进新时代兴边富民行动，切实维护民族团结、边疆稳固。","tags":["习近平总书记","考察云南","三个定位"]},{"id":"zz-02","module":"zz","title":"云南“三个定位”","priority":"高","content":"努力成为我国民族团结进步示范区、生态文明建设排头兵、面向南亚东南亚辐射中心。这是习近平总书记对云南发展的科学定位，是云南一切工作的根本遵循。","tags":["三个定位","根本遵循"]},{"id":"zz-03","module":"zz","title":"云南“3815”战略发展目标","priority":"高","content":"3年上台阶（到2025年）、8年大发展（到2030年）、15年大跨越（到2035年，与全国同步基本实现社会主义现代化）。是省委谋划的“三个三”奋斗目标总纲。","tags":["3815","战略目标"]},{"id":"zz-04","module":"zz","title":"铸牢中华民族共同体意识","priority":"高","content":"① 2017年写入党章，2018年写入宪法。② 2021年中央民族工作会议明确：铸牢中华民族共同体意识是新时代党的民族工作的“纲”。③ 云南作为民族团结进步示范区，文山作为民族自治州，是本考试的重中之重。","tags":["民族团结","中华民族共同体"]},{"id":"zz-05","module":"zz","title":"党的二十大核心要点","priority":"高","content":"① 主题：高举中国特色社会主义伟大旗帜，为全面建设社会主义现代化国家、全面推进中华民族伟大复兴而团结奋斗。② 中心任务：团结带领全国各族人民全面建成社会主义现代化强国、实现第二个百年奋斗目标，以中国式现代化全面推进中华民族伟大复兴。③ 中国式现代化五大特征：人口规模巨大、全体人民共同富裕、物质文明和精神文明相协调、人与自然和谐共生、走和平发展道路。","tags":["二十大","中国式现代化"]},{"id":"zz-06","module":"zz","title":"政府工作报告与中央经济工作会议","priority":"中","content":"① 中央经济工作会议：坚持稳中求进工作总基调，高质量发展是新时代的硬道理。② 备考要精读最新云南省政府工作报告、文山州政府工作报告，重点记“当年重点工作 + 预期目标数据”。","tags":["政府工作报告","经济工作"]},{"id":"zz-07","module":"zz","title":"党的二十届五中全会精神与省委十一届十一次全会","priority":"高","content":"① 党的二十届五中全会研究制定“十五五”规划建议，明确“十五五”时期是基本实现社会主义现代化夯实基础、全面发力的关键时期。② 云南省委十一届十一次全会（2026年11月，昆明）深入学习贯彻党的二十届五中全会精神，审议通过《中共云南省委关于深入学习贯彻党的二十届五中全会精神持之以恒推进全面从严治党的意见》，听取省第十二次党代会筹备情况报告。③ 全会强调以高质量党建引领高质量发展，持之以恒推进全面从严治党。","tags":["二十届五中全会","省委全会","从严治党"]},{"id":"ws-01","module":"ws","title":"文山州基本情况","priority":"高","content":"① 全称：文山壮族苗族自治州，位于云南省东南部。② 面积3.14万平方公里，辖1市7县（文山市、砚山县、西畴县、麻栗坡县、马关县、丘北县、广南县、富宁县）。③ 与越南接壤，边境线长438公里。④ 11个世居民族：壮、苗、汉、彝、瑶、回、傣、白、布依、蒙古、仡佬。","tags":["州情","基本数据"]},{"id":"ws-02","module":"ws","title":"三七产业（中国三七之乡）","priority":"高","content":"① 文山是“中国三七之乡”，三七种植历史悠久，产量约占全国九成以上。② 州委州政府把三七产业作为重点特色产业，推动“种、加、销、研”全产业链发展。③ 常结合“高原特色农业”“产业振兴”出题。","tags":["三七","特色产业"]},{"id":"ws-03","module":"ws","title":"绿色铝产业","priority":"高","content":"① 云南依托水电优势发展“绿色铝”，文山是重要基地（砚山、富宁等）。② 方向：水电铝材一体化、延链补链强链、绿色低碳。③ “十四五”以来绿色铝成为文山首个千亿级产业；2026年围绕“铝水100%就地转化、铝材100%精深加工”两大目标，培育汽车零部件、建筑铝材、终端消费品“三个百万吨级”精深加工集群，并布局再生铝。④ 常与“新质生产力”“绿色能源”“工业强州”结合出题。","tags":["绿色铝","水电铝材"]},{"id":"ws-04","module":"ws","title":"口岸经济","priority":"中","content":"① 主要口岸：天保口岸（麻栗坡，国家级）、都龙口岸（马关）、田蓬口岸（富宁）。② 依托面向南亚东南亚辐射中心定位，发展口岸经济、沿边开放、边民互市。③ 常与“兴边富民”“沿边开发开放”结合出题。","tags":["口岸","沿边开放"]},{"id":"ws-05","module":"ws","title":"民族团结进步示范建设","priority":"高","content":"① 文山作为民族自治州，民族团结进步是主旋律，涌现“老山精神”“西畴精神”。② 重点：铸牢中华民族共同体意识、兴边富民行动、边境幸福村建设。③ 老山精神（麻栗坡）、西畴精神（苦干实干）是本地红色资源，写作可直接引用。","tags":["民族团结","老山精神","西畴精神"]},{"id":"ws-06","module":"ws","title":"州级重点工作与“1262”机制","priority":"中","content":"① 云南省防汛“1262”精细化预报与响应联动机制：提前12小时预报、6小时预警、2小时叫应。② 州级还会开展各类专项行动（以最新州政府、州委文件表述为准，请备考时持续关注权威发布并更新本条目）。③ 答题时善用“机制名称 + 作用”体现本地化。","tags":["1262机制","州重点工作"]},{"id":"ws-07","module":"ws","title":"文山州2026年政府工作报告要点","priority":"高","content":"① “十五五”时期是文山加快发展、后发赶超的重要机遇期。② 深入实施“产业强州”战略，推动产业转型升级。③ 绿色铝：围绕“铝水100%就地转化、铝材100%精深加工”两大目标，培育汽车零部件、建筑铝材、终端消费品“三个百万吨级”精深加工集群，布局再生铝。④ “十四五”以来全州地区生产总值突破1600亿元，绿色铝成为首个千亿级产业。⑤ 深化“两场革命”（作风革命、效能革命），突出“产业、项目、干部、环境”四个重点，落实“五个清单”闭环管理机制，用好“三法三化”“主动想、扎实干、看效果”工作法。","tags":["政府工作报告","产业强州","绿色铝"]},{"id":"ds-01","module":"ds","title":"党的基本知识","priority":"高","content":"① 性质：中国工人阶级的先锋队，同时是中国人民和中华民族的先锋队。② 宗旨：全心全意为人民服务。③ 初心使命：为中国人民谋幸福、为中华民族谋复兴。④ 入党誓词要会默写。","tags":["党的性质","宗旨","初心使命"]},{"id":"ds-02","module":"ds","title":"《中国共产党纪律处分条例》要点","priority":"中","content":"① 违纪分类：政治纪律、组织纪律、廉洁纪律、群众纪律、工作纪律、生活纪律（六大纪律）。② 监督执纪“四种形态”。③ 政治纪律是打头的、管总的纪律。","tags":["纪律处分条例","六大纪律"]},{"id":"ds-03","module":"ds","title":"《公务员法》要点","priority":"中","content":"① 公务员考核：平时考核、专项考核、定期考核；定期考核结果分优秀、称职、基本称职、不称职。② 回避制度：任职回避、地域回避、公务回避。③ 惩戒：警告、记过、记大过、降级、撤职、开除。","tags":["公务员法","考核","回避"]},{"id":"ds-04","module":"ds","title":"基层党组织生活制度","priority":"中","content":"① “三会一课”：支部党员大会、支部委员会、党小组会、党课。② 主题党日、民主生活会/组织生活会、民主评议党员。③ 这些既是客观题考点，也是面试和案例分析素材。","tags":["三会一课","组织生活"]},{"id":"ds-05","module":"ds","title":"党的自我革命","priority":"中","content":"① 全面从严治党是新时代党的建设的鲜明主题。② 自我革命是党跳出历史周期率的“第二个答案”（第一个答案是人民监督）。③ 常与作风建设、廉洁从政结合出题。","tags":["自我革命","全面从严治党"]},{"id":"ds-06","module":"ds","title":"四个意识 / 四个自信 / 两个维护","priority":"高","content":"① 四个意识：政治意识、大局意识、核心意识、看齐意识。② 四个自信：道路自信、理论自信、制度自信、文化自信。③ 两个维护：坚决维护习近平总书记党中央的核心、全党的核心地位，坚决维护党中央权威和集中统一领导。","tags":["四个意识","两个维护"]},{"id":"al-01","module":"al","title":"综合分析类答题框架","priority":"高","content":"① 表态：对现象/观点亮明态度（辩证看）。② 分析：原因、影响、意义（分主体：群众/政府/社会）。③ 对策：针对性提出举措。④ 升华：上升到政策高度或治理理念。字数视分值控制。","tags":["综合分析","框架"]},{"id":"al-02","module":"al","title":"组织协调类答题框架","priority":"高","content":"① 事前：明确目的、制定方案、请示汇报、成立工作组。② 事中：按方案推进、分工协作、控制进度、应急处置。③ 事后：总结评估、形成报告、建立长效机制。常见：会议、调研、活动、培训组织。","tags":["组织协调","框架"]},{"id":"al-03","module":"al","title":"应急处突类答题框架","priority":"高","content":"① 第一原则：生命至上、安全第一，先救人控事。② 快速反应：启动预案、成立现场指挥部。③ 控制事态：隔离风险、疏导群众。④ 舆情应对：及时发声、主动公开、回应关切。⑤ 善后：调查原因、问责整改、建章立制。","tags":["应急处突","框架"]},{"id":"al-04","module":"al","title":"人际沟通类答题框架","priority":"中","content":"① 尊重理解：换位思考、不激化矛盾。② 原则办事：坚持政策与纪律底线。③ 沟通协调：主动说明、争取理解支持。④ 反思改进：提升自身、维护团结。常见：同事矛盾、领导批评、群众不满。","tags":["人际沟通","框架"]},{"id":"al-05","module":"al","title":"案例分析作答三原则","priority":"中","content":"① 定性准确：先判断这是什么类型/什么性质的问题。② 层次清晰：分条作答，先观点后分析。③ 接地气：结合基层实际，善用“机制、台账、闭环”等工作语言。","tags":["作答原则"]},{"id":"al-06","module":"al","title":"常用对策“万能工具箱”","priority":"中","content":"① 组织保障：成立专班、压实责任、督查问效。② 制度保障：健全机制、完善制度、清单管理。③ 队伍保障：培训赋能、作风转变。④ 宣传引导：典型引路、营造氛围。⑤ 长效机制：举一反三、闭环整改。","tags":["对策","万能工具"]},{"id":"gw-01","module":"gw","title":"会议通知写作要素","priority":"高","content":"六要素：会议名称、时间、地点、参会人员、会议内容（议题）、注意事项（报名/材料/着装）。标题可用“关于召开××会议的通知”，正文简洁明确、要素齐全。","tags":["通知","会议"]},{"id":"gw-02","module":"gw","title":"会议筹备方案结构","priority":"高","content":"① 会议主题/目的。② 时间地点。③ 参会人员。④ 议程安排。⑤ 组织分工（会务、材料、后勤、宣传）。⑥ 经费与保障。⑦ 工作要求。这是2024年真题方向，务必练熟。","tags":["会议方案","2024真题方向"]},{"id":"gw-03","module":"gw","title":"动员讲话稿三段式","priority":"高","content":"① 开头：点题 + 讲意义（为什么要干）。② 主体：讲任务 + 讲方法（干什么、怎么干）。③ 结尾：提要求 + 鼓干劲（压实责任、号召落实）。语言要有感召力，善用排比。","tags":["讲话稿","动员"]},{"id":"gw-04","module":"gw","title":"请示与报告的写法","priority":"中","content":"① 请示：一文一事，向上级请求指示/批准，结尾用“妥否，请批示”。② 报告：汇报工作、反映情况，不要求批复。③ 二者不可混用，格式要规范（主送机关、正文、落款、日期）。","tags":["请示","报告"]},{"id":"gw-05","module":"gw","title":"政务信息/简报写法","priority":"中","content":"① 标题：简洁点题。② 导语：何时何地何事。③ 正文：分层次写做法/成效/经验。④ 结尾：可加下步打算。字数通常300—800字。","tags":["简报","信息"]},{"id":"gw-06","module":"gw","title":"公文格式规范要点","priority":"中","content":"① 标题：发文机关 + 事由 + 文种。② 主送机关顶格。③ 正文结构层次序数：一、(一) 1. (1)。④ 落款：成文日期用阿拉伯数字。⑤ 附件、抄送等按规范。格式错是硬扣分点。","tags":["格式规范"]},{"id":"zw-01","module":"zw","title":"策论文五段结构","priority":"高","content":"标题 + 开头（破题点题、亮明观点）+ 2—3个分论点（每个分论点：观点句 + 分析 + 对策）+ 结尾（呼应升华）。约1500字，30分权重最大。","tags":["结构","五段式"]},{"id":"zw-02","module":"zw","title":"对策段“三要素”写法","priority":"高","content":"每个对策段 = 主体 + 举措 + 成效。例：“要抓实产业发展（举措）——由州级部门牵头（主体）延链补链，让三七、绿色铝真正富民强州（成效）。”","tags":["对策段","三要素"]},{"id":"zw-03","module":"zw","title":"开头与标题技巧","priority":"中","content":"① 标题：可用“观点式”或“对仗式”，如《厚植产业根基 绘就富民新篇》。② 开头：金句/数据导入 + 点题 + 亮明总论点，控制在150字内。","tags":["标题","开头"]},{"id":"zw-04","module":"zw","title":"本地化案例库（写作必备）","priority":"高","content":"① 三七：中国三七之乡，特色产业富民。② 绿色铝：水电铝材一体化、绿色低碳。③ 口岸经济：天保/都龙/田蓬，面向南亚东南亚。④ 民族团结：老山精神、西畴精神、边境幸福村。⑤ 基层治理：乡村振兴、网格化、兴边富民。写对策时优先调用这些本地案例，紧扣“文山”得分更高。","tags":["本地案例","素材库"]},{"id":"zw-05","module":"zw","title":"策论文高频主题方向","priority":"中","content":"① 产业振兴/新质生产力。② 乡村振兴/基层治理。③ 民族团结/铸牢中华民族共同体意识。④ 生态文明/绿色发展。⑤ 作风建设/担当作为。围绕这五大方向各备一篇范文。","tags":["高频主题"]},{"id":"zw-06","module":"zw","title":"策论文评分要点","priority":"中","content":"① 观点明确、立意高。② 结构完整、层次清晰。③ 对策具体、有操作性。④ 语言规范、有一定文采。⑤ 结合本地实际、不空泛。","tags":["评分要点"]}],"timu":[{"id":"zz-01","module":"zz","type":"单选","difficulty":"中","stem":"习近平总书记对云南提出“三个定位”，下列不属于“三个定位”的是（ ）。","options":["A. 民族团结进步示范区","B. 生态文明建设排头兵","C. 面向南亚东南亚辐射中心","D. 高原特色农业强省"],"answer":3,"analysis":"“三个定位”是民族团结进步示范区、生态文明建设排头兵、面向南亚东南亚辐射中心。D项“高原特色农业强省”不是三个定位之一。"},{"id":"zz-02","module":"zz","type":"单选","difficulty":"中","stem":"云南“3815”战略发展目标中，“15”指的是（ ）。","options":["A. 到2035年大跨越","B. 15项重点任务","C. 15个州（市）","D. 到2025年上台阶"],"answer":0,"analysis":"“3815”即3年上台阶（到2025年）、8年大发展（到2030年）、15年大跨越（到2035年）。"},{"id":"zz-03","module":"zz","type":"多选","difficulty":"中","stem":"关于铸牢中华民族共同体意识，下列说法正确的有（ ）。","options":["A. 2017年写入党章","B. 2018年写入宪法","C. 是新时代党的民族工作的“纲”","D. 与云南民族团结进步示范区建设无关"],"answer":[0,1,2],"analysis":"A、B、C均正确。D错误：云南作为民族团结进步示范区，与铸牢中华民族共同体意识高度相关。"},{"id":"zz-04","module":"zz","type":"判断","difficulty":"易","stem":"中国式现代化是人口规模巨大的现代化、全体人民共同富裕的现代化、物质文明和精神文明相协调的现代化、人与自然和谐共生的现代化、走和平发展道路的现代化。（ ）","options":["正确","错误"],"answer":0,"analysis":"该表述完整准确，为中国式现代化五大特征。"},{"id":"zz-05","module":"zz","type":"单选","difficulty":"中","stem":"云南省委十一届十一次全会审议通过的文件是（ ）。","options":["A. 《关于深入学习贯彻党的二十届五中全会精神持之以恒推进全面从严治党的意见》","B. 《云南省“十五五”规划纲要》","C. 《云南高质量发展三年行动方案》","D. 《乡村振兴促进条例》"],"answer":0,"analysis":"云南省委十一届十一次全会（2026年11月）审议通过了《中共云南省委关于深入学习贯彻党的二十届五中全会精神持之以恒推进全面从严治党的意见》。"},{"id":"ws-01","module":"ws","type":"单选","difficulty":"中","stem":"文山州辖1市7县，下列不属于文山州的是（ ）。","options":["A. 砚山县","B. 麻栗坡县","C. 富宁县","D. 建水县"],"answer":3,"analysis":"建水县属于红河州，不属于文山州。文山州1市7县为文山市、砚山、西畴、麻栗坡、马关、丘北、广南、富宁。"},{"id":"ws-02","module":"ws","type":"单选","difficulty":"易","stem":"文山州被誉为“中国（ ）之乡”。","options":["A. 三七","B. 普洱茶","C. 咖啡","D. 火腿"],"answer":0,"analysis":"文山是中国三七之乡，三七产量约占全国九成以上。"},{"id":"ws-03","module":"ws","type":"多选","difficulty":"中","stem":"下列属于文山州重点发展的产业或方向的有（ ）。","options":["A. 三七产业","B. 绿色铝产业","C. 口岸经济","D. 水电铝材一体化"],"answer":[0,1,2,3],"analysis":"三七、绿色铝、口岸经济、水电铝材一体化均为文山州重点发展方向，全选。"},{"id":"ws-04","module":"ws","type":"判断","difficulty":"中","stem":"云南省防汛“1262”机制是指提前12小时预报、6小时预警、2小时叫应的精细化预报与响应联动机制。（ ）","options":["正确","错误"],"answer":0,"analysis":"表述正确。“1262”即12小时预报、6小时预警、2小时叫应。"},{"id":"ws-05","module":"ws","type":"单选","difficulty":"中","stem":"“十四五”以来，文山州培育的首个千亿级产业是（ ）。","options":["A. 三七产业","B. 绿色铝产业","C. 旅游产业","D. 口岸经济"],"answer":1,"analysis":"“十四五”以来文山州地区生产总值突破1600亿元，绿色铝成为全州首个千亿级产业。"},{"id":"ds-01","module":"ds","type":"单选","difficulty":"易","stem":"中国共产党的宗旨是（ ）。","options":["A. 全心全意为人民服务","B. 实现共同富裕","C. 发展生产力","D. 改革开放"],"answer":0,"analysis":"党的宗旨是全心全意为人民服务。"},{"id":"ds-02","module":"ds","type":"多选","difficulty":"中","stem":"下列属于《中国共产党纪律处分条例》规定的“六大纪律”的有（ ）。","options":["A. 政治纪律","B. 组织纪律","C. 群众纪律","D. 生活纪律"],"answer":[0,1,2,3],"analysis":"六大纪律为政治、组织、廉洁、群众、工作、生活纪律，题目所列四项均属其中（廉洁、工作纪律未列出，不影响已选项正确）。"},{"id":"ds-03","module":"ds","type":"单选","difficulty":"中","stem":"公务员定期考核结果中，不属于合格以上档次的是（ ）。","options":["A. 优秀","B. 称职","C. 基本称职","D. 良好"],"answer":3,"analysis":"定期考核结果分优秀、称职、基本称职、不称职四个等次，不存在“良好”档次。"},{"id":"ds-04","module":"ds","type":"判断","difficulty":"易","stem":"“三会一课”是指支部党员大会、支部委员会、党小组会和党课。（ ）","options":["正确","错误"],"answer":0,"analysis":"表述正确。"},{"id":"al-01","module":"al","type":"案例分析","difficulty":"中","stem":"某乡镇发生山洪险情，部分群众被困，但个别干部推诿扯皮、处置迟缓，引发群众不满并在网络发酵。作为镇党政办负责人，你怎么办？","options":[],"answer":"① 生命至上，立即报告主要领导，启动应急预案，协调救援力量先救人。② 现场指挥：成立临时指挥部，分工到人，组织转移安置、交通管制、物资保障。③ 舆情应对：第一时间通过官方渠道发布权威信息，回应群众关切，避免谣言扩散。④ 善后整改：查明推诿责任，依规问责，举一反三完善应急机制与值班值守制度。⑤ 总结经验，形成报告上报。","analysis":"本题属应急处突+舆情应对复合型。要点：生命至上、快速反应、控制事态、舆情引导、问责整改。"},{"id":"al-02","module":"al","type":"案例分析","difficulty":"中","stem":"领导安排你牵头组织一次全县乡村振兴现场观摩会，你怎么组织？","options":[],"answer":"① 事前：吃透领导意图，制定方案（时间、路线、参观点、参会人员、议程），报领导审定，成立会务组并分工。② 事中：按方案推进，做好现场调度、材料印发、车辆食宿、安全保障，遇突发情况及时处置并请示。③ 事后：形成总结报告，宣传推广好经验好做法，建立观摩成果转化清单，跟踪督办。","analysis":"属组织协调类。按“事前—事中—事后”展开，突出细节与闭环。"},{"id":"al-03","module":"al","type":"案例分析","difficulty":"易","stem":"同事小王因工作被领导批评后情绪低落，影响工作，你怎么与他沟通？","options":[],"answer":"① 尊重理解：私下主动关心，倾听他的想法，肯定其工作付出。② 帮助分析：帮他客观看待批评，一起找问题、想办法。③ 原则办事：提醒他正确对待批评，不因情绪影响工作。④ 协调支持：在工作上搭把手、分享经验。⑤ 反思改进：引导其把压力变动力，提升能力。","analysis":"属人际沟通类。要点：理解关心 + 帮助改进 + 维护工作大局。"},{"id":"al-04","module":"al","type":"案例分析","difficulty":"中","stem":"对“基层形式主义、报表负担重”的现象，谈谈你的看法。","options":[],"answer":"① 表态：这是作风问题，必须坚决整治，为基层减负。② 分析原因：考核导向偏差、层层加码、部门各自为政、信息化不协同。③ 分析危害：挤占为民服务时间、挫伤干部积极性、影响政策落实。④ 对策：统筹督查考核、整合报表台账、推进数据共享、树立实干导向、健全基层减负长效机制。⑤ 升华：让基层干部把更多精力用在为民办事、推动发展上。","analysis":"属综合分析类。注意“表态—原因—危害—对策—升华”结构，对策要具体可操作。"},{"id":"gw-01","module":"gw","type":"公文写作","difficulty":"中","stem":"请以某乡镇党政办名义，拟写一份关于召开防汛抗旱工作会议的通知（要素齐全，150字左右即可）。","options":[],"answer":"关于召开全镇防汛抗旱工作会议的通知\n各村（社区）、镇属各单位：\n经镇党委研究，定于2027年5月20日上午9:00在镇政府三楼会议室召开全镇防汛抗旱工作会议，传达上级精神、部署今年防汛抗旱任务。请各村（社区）主任、相关单位负责人准时参加，并提前准备本辖区汛情隐患排查情况。\n联系人：×××，电话：×××。\n××镇党政办公室\n2027年5月15日","analysis":"要素：标题、主送、时间地点、参会人员、议题、注意事项、落款日期。六要素齐全即得分。"},{"id":"gw-02","module":"gw","type":"公文写作","difficulty":"中","stem":"请拟写一份招商引资推介会筹备方案的主要框架（列提纲即可）。","options":[],"answer":"一、会议主题与目的；二、时间与地点；三、参会人员（企业嘉宾、州县领导、部门）；四、议程安排（领导致辞、产业推介、项目签约、实地考察）；五、组织分工（会务组、材料组、宣传组、后勤组、接待组）；六、经费预算与保障；七、工作要求（压实责任、注重实效、严守纪律）。","analysis":"对应2024年真题“招商引资会议筹备方案”方向，框架完整即可。"},{"id":"gw-03","module":"gw","type":"公文写作","difficulty":"中","stem":"请围绕“发展三七产业、促进群众增收”写一段动员讲话稿的开头（100字左右）。","options":[],"answer":"同志们：三七是文山的名片，更是群众的“致富草”。发展好三七产业，关系特色农业提质增效，关系广大农民增收致富，关系乡村振兴成色。今天我们召开会议，就是要统一思想、明确任务、狠抓落实，把三七这篇大文章做好做实。","analysis":"开头要点：点题 + 讲意义（用排比）+ 引出任务。"},{"id":"gw-04","module":"gw","type":"判断","difficulty":"易","stem":"请示可以一文多事，以提高办事效率。（ ）","options":["正确","错误"],"answer":1,"analysis":"错误。请示应当一文一事，便于上级审批。"},{"id":"zw-01","module":"zw","type":"策论文","difficulty":"中","stem":"请以“厚植产业根基 绘就文山富民新篇”为题，写一篇策论文的开头（150字左右）。","options":[],"answer":"产业兴则文山兴，产业强则百姓富。三七甲天下、绿色铝成链、口岸连内外，今天的文山正处在产业转型跃升的关键期。但也要看到，链条短、品牌弱、带动力不足仍是短板。唯有立足资源禀赋、延链补链强链，把特色产业做成富民产业，才能让高质量发展成果更多更公平惠及各族群众。","analysis":"开头要点：点题 + 本地优势（三七/绿色铝/口岸）+ 摆问题 + 亮明总论点。"},{"id":"zw-02","module":"zw","type":"策论文","difficulty":"中","stem":"围绕“以产业振兴带动乡村振兴”，写一条对策段（含主体+举措+成效，100字左右）。","options":[],"answer":"要壮大特色产业（举措）。由州县两级政府牵头（主体），整合项目资金，推动三七、绿色铝等优势产业延链补链、联农带农（举措），让群众在家门口就业增收，真正把资源优势转化为发展优势、富民优势（成效）。","analysis":"对策段三要素齐全：举措+主体+成效，且结合本地案例。"},{"id":"zw-03","module":"zw","type":"策论文","difficulty":"中","stem":"请为“铸牢中华民族共同体意识”主题的策论文拟一个对仗式标题。","options":[],"answer":"示例：《同心共筑中国梦 携手浇灌团结花》《铸牢共同体意识 绘就同心圆画卷》《手足相亲一家亲 同心共筑兴边梦》。","analysis":"对仗式标题：两个四/六字短句，紧扣主题、有文采。"},{"id":"zw-04","module":"zw","type":"策论文","difficulty":"易","stem":"策论文的结构通常包括标题、开头、分论点、结尾四部分，其中对策应放在分论点部分重点展开。（ ）","options":["正确","错误"],"answer":0,"analysis":"正确。策论文以“策”为主，分论点部分重点展开对策。"}],"muban":[{"id":"gw-01","module":"gw","title":"会议通知（模板）","scene":"上级或本级部署会议，需通知参会。","template":"关于召开××会议的通知\n\n××（主送单位）：\n\n为（目的/依据），经研究，定于×年×月×日（星期×）上午/下午×时在××（地点）召开××会议。\n\n一、会议内容：……\n二、参会人员：……\n三、有关事项：请参会人员提前×分钟入场，遵守会议纪律；请于×月×日前将参会名单报××（联系人××，电话××）。\n\n××（发文单位）\n×年×月×日","tips":"六要素（名称、时间、地点、人员、议题、注意事项）缺一不可。"},{"id":"gw-02","module":"gw","title":"会议筹备方案（模板）","scene":"重要会议/活动的组织方案。","template":"××会议筹备方案\n\n一、会议主题与目的\n二、时间地点\n三、参会人员\n四、议程安排\n五、组织分工（会务组/材料组/宣传组/后勤组/接待组）\n六、经费预算与保障\n七、工作要求\n\n（落款：××单位　×年×月×日）","tips":"对应2024年真题方向，分工越具体越得分。"},{"id":"gw-03","module":"gw","title":"动员讲话稿（模板）","scene":"部署重点工作前的动员。","template":"同志们：\n\n（开头）点题 + 讲意义（排比）——为什么要干。\n\n（主体）讲任务 + 讲方法——干什么、怎么干，分2—3点。\n\n（结尾）提要求 + 鼓干劲——压实责任、强化担当、号召落实。","tips":"语言要有感召力，善用“要……要……要……”排比句式。"},{"id":"gw-04","module":"gw","title":"请示（模板）","scene":"向上级请求指示或批准。","template":"关于××的请示\n\n××（主送机关）：\n\n（事由：说明情况、理由、请求事项）……\n\n以上请示，妥否，请批示。\n\n（附件：××）\n\n××（发文单位）\n×年×月×日","tips":"一文一事，事由充分，结尾“妥否，请批示”。"},{"id":"gw-05","module":"gw","title":"政务信息/简报（模板）","scene":"反映工作动态、经验做法。","template":"标题（简洁点题）\n\n（导语）为……，×地/×单位于×月×日开展了……。\n\n（正文）一是……；二是……；三是……。\n\n（结尾）下一步，将……。","tips":"标题醒目，正文分条，突出做法与成效。"},{"id":"al-01","module":"al","title":"应急处突答题模板","scene":"突发公共事件/舆情/群体性事件。","template":"① 生命至上、快速反应：第一时间报告、启动预案。\n② 现场处置：成立指挥部，分工负责，救人控事。\n③ 舆情引导：主动发声、回应关切。\n④ 善后整改：调查问责、建章立制、举一反三。","tips":"牢记顺序：先控事、再发声、后整改。"},{"id":"al-02","module":"al","title":"组织协调答题模板","scene":"会议/调研/活动/培训的组织。","template":"事前：制定方案、请示汇报、成立专班、准备保障。\n事中：按方案推进、现场调度、应急处置。\n事后：总结报告、宣传推广、跟踪督办、建立长效机制。","tips":"“事前—事中—事后”三段式，突出细节。"},{"id":"zw-01","module":"zw","title":"策论文通用框架（1500字）","scene":"大作文策论文。","template":"标题（观点式/对仗式）\n\n开头（150字）：金句/数据导入 + 点题 + 亮明总论点。\n\n分论点1（对策段）：观点句 + 分析 + 主体+举措+成效。\n分论点2（对策段）：同上。\n分论点3（对策段）：同上。\n\n结尾（120字）：总结升华 + 号召展望。","tips":"分论点一般2—3个，每段300—400字，总字数约1500。"},{"id":"zw-02","module":"zw","title":"对策段万能句式","scene":"策论文分论点、案例分析对策。","template":"要（举措）——由（主体）牵头，通过（具体办法），实现（成效）。\n例：要抓实产业延链补链——由州级部门牵头，通过招大引强、联农带农，把三七、绿色铝做成富民强州的支柱产业。","tips":"“主体+举措+成效”三要素齐全，杜绝空话套话。"},{"id":"zw-03","module":"zw","title":"金句库（开头/结尾）","scene":"策论文开头与升华。","template":"① 民生无小事，枝叶总关情。\n② 产业兴则文山兴，产业强则百姓富。\n③ 铸牢中华民族共同体意识，像石榴籽一样紧紧抱在一起。\n④ 绿水青山就是金山银山。\n⑤ 脚下沾有多少泥土，心中就沉淀多少真情。\n⑥ 担当作为，重在实干。","tips":"结合本地案例使用，避免生搬硬套。"}],"daily":{"startDate":"2026-11-20","perDay":{"kaodian":2,"timu":2,"muban":1}}};</script>
+<script>
+(function () {
+  var DATA = window.WSXK_CONTENT;
+  if (!DATA) { document.getElementById('view-today').innerHTML = '<div class="card">未能加载 content.js，请确认 content.js 与本文件在同一文件夹。</div>'; return; }
+
+  var LS_KEY = 'wsxk_checkin_v1';
+  var MODULE_NAME = {};
+  DATA.modules.forEach(function (m) { MODULE_NAME[m.id] = m.name; });
+
+  /* ---------- 日期与每日内容 ---------- */
+  function todayStr() {
+    var d = new Date(); var m = d.getMonth()+1, day = d.getDate();
+    return d.getFullYear() + '-' + (m<10?'0':'')+m + '-' + (day<10?'0':'')+day;
+  }
+  function dayIndex() {
+    var s = new Date(DATA.daily.startDate + 'T00:00:00');
+    var t = new Date(todayStr() + 'T00:00:00');
+    var diff = Math.floor((t - s) / 86400000);
+    return diff < 0 ? 0 : diff;
+  }
+  function pickDaily() {
+    var d = dayIndex();
+    var K = DATA.kaodian, T = DATA.timu, M = DATA.muban;
+    var ks = [K[(d*2) % K.length], K[(d*2+1) % K.length]];
+    var ts = [T[(d*2) % T.length], T[(d*2+1) % T.length]];
+    var ms = M[d % M.length];
+    return { ks: ks, ts: ts, ms: ms, idx: d+1 };
+  }
+
+  /* ---------- 打卡 ---------- */
+  function getCheckins() {
+    try { return JSON.parse(localStorage.getItem(LS_KEY) || '{}'); } catch(e) { return {}; }
+  }
+  function setCheckins(o) { localStorage.setItem(LS_KEY, JSON.stringify(o)); }
+  function isCheckedToday() { return !!getCheckins()[todayStr()]; }
+  function toggleCheckin() {
+    var o = getCheckins();
+    if (o[todayStr()]) { delete o[todayStr()]; setCheckins(o); showToast('已取消打卡'); }
+    else { o[todayStr()] = 1; setCheckins(o); showToast('打卡成功，加油！'); }
+    renderHeader(); renderToday(); renderMy();
+  }
+  window.toggleCheckin = toggleCheckin;
+  function showToast(msg) {
+    var t = document.getElementById('toast'); t.textContent = msg; t.style.display = 'block';
+    setTimeout(function(){ t.style.display = 'none'; }, 1200);
+  }
+
+  /* ---------- 渲染 ---------- */
+  function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function priTag(p) { return '<span class="tag '+(p==='高'?'pri-high':(p==='中'?'pri-mid':''))+'">'+esc(p)+'优先</span>'; }
+
+  function renderHeader() {
+    var meta = DATA.meta;
+    document.getElementById('headerSub').textContent = meta.name + ' · ' + meta.version;
+    var d = new Date();
+    var wk = ['日','一','二','三','四','五','六'][d.getDay()];
+    document.getElementById('todayDate').textContent = todayStr() + ' 周' + wk + ' · 第' + dayIndex() + '天';
+    var btn = document.getElementById('checkinBtn');
+    if (isCheckedToday()) { btn.textContent = '已打卡 ✓'; btn.className = 'checkin-btn done'; }
+    else { btn.textContent = '今日打卡'; btn.className = 'checkin-btn'; }
+  }
+
+  function renderToday() {
+    var d = pickDaily();
+    var html = '';
+    html += '<div class="section-title">今日考点（' + d.ks.length + ' 条）</div>';
+    d.ks.forEach(function (k) {
+      html += '<div class="card"><h3>' + priTag(k.priority) + esc(k.title) + '</h3>' +
+        '<div class="muted">模块：' + esc(MODULE_NAME[k.module]) + '</div>' +
+        '<div class="c" style="margin-top:8px">' + esc(k.content) + '</div></div>';
+    });
+    html += '<div class="section-title">今日模拟题（' + d.ts.length + ' 道）</div>';
+    d.ts.forEach(function (q, qi) {
+      html += renderQuestion(q, 't' + d.idx + '-' + qi);
+    });
+    html += '<div class="section-title">今日写作模板</div>';
+    html += renderTemplateCard(d.ms);
+    document.getElementById('view-today').innerHTML = html;
+  }
+
+  function renderQuestion(q, uid) {
+    var html = '<div class="card"><div class="muted">' + esc(MODULE_NAME[q.module]) + ' · ' + esc(q.type) + ' · ' + esc(q.difficulty) + '</div>';
+    html += '<div class="t" style="margin:8px 0">' + esc(q.stem) + '</div>';
+    if (q.options && q.options.length) {
+      q.options.forEach(function (opt, i) {
+        html += '<div class="q-option" id="opt-' + uid + '-' + i + '" onclick="pickOption(\'' + uid + '\',' + i + ')">' + esc(opt) + '</div>';
+      });
+    }
+    html += '<button class="btn ghost small" onclick="toggleAnswer(\'' + uid + '\')">查看答案与解析</button>';
+    html += '<div class="answer-box" id="ans-' + uid + '">' +
+      '<div style="font-weight:600;margin-bottom:4px">参考答案：</div><div>' + esc(formatAnswer(q)) + '</div>' +
+      '<div style="font-weight:600;margin:8px 0 4px">解析：</div><div>' + esc(q.analysis) + '</div></div>';
+    html += '</div>';
+    window.__qmap = window.__qmap || {};
+    window.__qmap[uid] = q;
+    return html;
+  }
+  function formatAnswer(q) {
+    if (q.options && q.options.length) {
+      if (Array.isArray(q.answer)) { return q.answer.map(function(i){return q.options[i];}).join('；'); }
+      return q.options[q.answer];
+    }
+    return q.answer;
+  }
+  window.pickOption = function (uid, i) {
+    var q = window.__qmap[uid];
+    if (!q) return;
+    var isMulti = Array.isArray(q.answer);
+    if (!isMulti) {
+      for (var j=0; j<q.options.length; j++) {
+        var el = document.getElementById('opt-' + uid + '-' + j);
+        el.classList.remove('correct','wrong');
+        if (j === q.answer) el.classList.add('correct');
+      }
+      if (i !== q.answer) {
+        document.getElementById('opt-' + uid + '-' + i).classList.add('wrong');
+      }
+    } else {
+      var el = document.getElementById('opt-' + uid + '-' + i);
+      if (q.answer.indexOf(i) >= 0) { el.classList.add('correct'); } else { el.classList.add('wrong'); }
+    }
+  };
+  window.toggleAnswer = function (uid) {
+    var el = document.getElementById('ans-' + uid);
+    el.classList.toggle('open');
+  };
+
+  function renderTemplateCard(m) {
+    return '<div class="card"><h3>📄 ' + esc(m.title) + '</h3>' +
+      '<div class="muted">适用场景：' + esc(m.scene) + '</div>' +
+      '<div class="template-box" style="margin-top:8px">' + esc(m.template) + '</div>' +
+      '<div class="muted" style="margin-top:8px">💡 ' + esc(m.tips) + '</div></div>';
+  }
+
+  function renderPlan() {
+    var html = '';
+    html += '<div class="section-title">四阶段备考计划</div>';
+    DATA.phases.forEach(function (p) {
+      html += '<div class="card"><div class="phase-item"><div class="pn">' + esc(p.name) + '</div>' +
+        '<div class="pp">' + esc(p.period) + '</div>' +
+        '<div class="c" style="margin-top:4px">目标：' + esc(p.goal) + '</div>' +
+        '<ul>' + p.tasks.map(function(t){return '<li>'+esc(t)+'</li>';}).join('') + '</ul></div></div>';
+    });
+    html += '<div class="section-title">六大模块</div>';
+    DATA.modules.forEach(function (m) {
+      html += '<div class="module-chip" onclick="jumpModule(\'' + m.id + '\')">' +
+        '<div class="ic">' + m.icon + '</div>' +
+        '<div><div class="nm">' + esc(m.name) + '</div>' +
+        '<div class="wt">' + esc(m.weight) + '</div>' +
+        '<div class="c" style="font-size:13px;margin-top:4px">' + esc(m.method) + '</div></div></div>';
+    });
+    document.getElementById('view-plan').innerHTML = html;
+  }
+  window.jumpModule = function (id) { switchTab('kaodian', id); };
+
+  function renderKaodian(filterId) {
+    if (filterId) { window.__kFilter = filterId; }
+    var f = window.__kFilter || 'all';
+    var html = '<div class="filter-row"><button class="filter-btn' + (f==='all'?' active':'') + '" onclick="setKFilter(\'all\')">全部</button>';
+    DATA.modules.forEach(function (m) {
+      html += '<button class="filter-btn' + (f===m.id?' active':'') + '" onclick="setKFilter(\'' + m.id + '\')">' + m.icon + ' ' + esc(m.name) + '</button>';
+    });
+    html += '</div>';
+    var list = DATA.kaodian.filter(function(k){ return f==='all' || k.module===f; });
+    list.forEach(function (k, i) {
+      var uid = 'k' + i + '-' + k.id;
+      html += '<div class="card"><div class="collapse-head" onclick="toggleCollapse(\'' + uid + '\')">' +
+        '<div><span class="tag">' + esc(MODULE_NAME[k.module]) + '</span>' + priTag(k.priority) + '<span style="font-weight:600">' + esc(k.title) + '</span></div>' +
+        '<span class="arrow" id="ar-' + uid + '">▶</span></div>' +
+        '<div class="collapse-body" id="cb-' + uid + '">' + esc(k.content) +
+        '<div class="muted" style="margin-top:6px">标签：' + k.tags.map(esc).join(' · ') + '</div></div></div>';
+    });
+    document.getElementById('view-kaodian').innerHTML = html;
+  }
+  window.setKFilter = function (id) { renderKaodian(id); };
+  window.toggleCollapse = function (uid) {
+    var b = document.getElementById('cb-' + uid); var a = document.getElementById('ar-' + uid);
+    b.classList.toggle('open'); a.classList.toggle('open');
+  };
+
+  function renderTimu(filterId) {
+    if (filterId) { window.__tFilter = filterId; }
+    var f = window.__tFilter || 'all';
+    var html = '<div class="filter-row"><button class="filter-btn' + (f==='all'?' active':'') + '" onclick="setTFilter(\'all\')">全部</button>';
+    DATA.modules.forEach(function (m) {
+      html += '<button class="filter-btn' + (f===m.id?' active':'') + '" onclick="setTFilter(\'' + m.id + '\')">' + m.icon + ' ' + esc(m.name) + '</button>';
+    });
+    html += '</div>';
+    var list = DATA.timu.filter(function(q){ return f==='all' || q.module===f; });
+    list.forEach(function (q, i) {
+      html += renderQuestion(q, 'all' + i + '-' + q.id);
+    });
+    document.getElementById('view-timu').innerHTML = html;
+  }
+  window.setTFilter = function (id) { renderTimu(id); };
+
+  function renderMuban(filterId) {
+    if (filterId) { window.__mFilter = filterId; }
+    var f = window.__mFilter || 'all';
+    var html = '<div class="filter-row"><button class="filter-btn' + (f==='all'?' active':'') + '" onclick="setMFilter(\'all\')">全部</button>';
+    DATA.modules.forEach(function (m) {
+      html += '<button class="filter-btn' + (f===m.id?' active':'') + '" onclick="setMFilter(\'' + m.id + '\')">' + m.icon + ' ' + esc(m.name) + '</button>';
+    });
+    html += '</div>';
+    var list = DATA.muban.filter(function(m){ return f==='all' || m.module===f; });
+    list.forEach(function (m) { html += renderTemplateCard(m); });
+    document.getElementById('view-muban').innerHTML = html;
+  }
+  window.setMFilter = function (id) { renderMuban(id); };
+
+  function renderMy() {
+    var o = getCheckins();
+    var keys = Object.keys(o).filter(function(k){ return !!o[k]; }).sort();
+    var days = keys.length;
+    var streak = 0;
+    var d = new Date();
+    for (var i=0; i<365; i++) {
+      var dd = new Date(d); dd.setDate(d.getDate() - i);
+      var mm = dd.getMonth()+1, day = dd.getDate();
+      var s = dd.getFullYear() + '-' + (mm<10?'0':'')+mm + '-' + (day<10?'0':'')+day;
+      if (o[s]) { streak++; } else if (i===0) { /* 今天未打不打断连续 */ } else { break; }
+    }
+    var total = Math.max(1, dayIndex());
+    var pct = Math.min(100, Math.round(days / total * 100));
+    var html = '';
+    html += '<div class="stat-grid"><div class="stat"><div class="num">' + days + '</div><div class="lbl">累计打卡(天)</div></div>' +
+      '<div class="stat"><div class="num">' + streak + '</div><div class="lbl">连续打卡(天)</div></div>' +
+      '<div class="stat"><div class="num">' + pct + '%</div><div class="lbl">计划进度</div></div></div>';
+    html += '<div class="section-title">备考进度</div><div class="card"><div class="progress-bar"><div class="fill" style="width:' + pct + '%"></div></div>' +
+      '<div class="muted" style="margin-top:8px">已开始第 ' + Math.max(1, dayIndex()) + ' 天，坚持就是胜利！</div></div>';
+    html += '<div class="section-title">关于</div><div class="card">' +
+      '<div class="c">' + esc(DATA.meta.note) + '</div>' +
+      '<div class="muted" style="margin-top:6px">目标年份：' + DATA.meta.examYear + '年文山州公务员遴选</div>' +
+      '<div style="margin-top:10px"><button class="btn ghost small" onclick="resetData()">清空打卡记录</button></div></div>';
+    document.getElementById('view-my').innerHTML = html;
+  }
+  window.resetData = function () {
+    if (confirm('确定清空所有打卡记录？')) { setCheckins({}); renderHeader(); renderToday(); renderMy(); }
+  };
+
+  /* ---------- Tab 切换 ---------- */
+  function switchTab(tab, arg) {
+    ['today','plan','kaodian','timu','muban','my'].forEach(function (t) {
+      document.getElementById('view-' + t).style.display = (t === tab) ? '' : 'none';
+    });
+    document.querySelectorAll('.tabbar .tab').forEach(function (el) {
+      el.classList.toggle('active', el.getAttribute('data-tab') === tab);
+    });
+    if (tab === 'today') renderToday();
+    else if (tab === 'plan') renderPlan();
+    else if (tab === 'kaodian') renderKaodian(arg);
+    else if (tab === 'timu') renderTimu(arg);
+    else if (tab === 'muban') renderMuban(arg);
+    else if (tab === 'my') renderMy();
+    window.scrollTo(0, 0);
+  }
+  window.switchTab = switchTab;
+
+  /* ---------- 初始化 ---------- */
+  renderHeader();
+  renderToday();
+})();
+</script>
+</body>
+</html>
